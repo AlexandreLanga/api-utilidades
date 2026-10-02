@@ -20,6 +20,7 @@
         <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
         <jackson-bom.version>3.1.7</jackson-bom.version>
         <tomcat.version>11.0.25</tomcat.version>
+        <jacoco.check.skip>false</jacoco.check.skip>
         <sonar.projectKey>AlexandreLanga_api-utilidades</sonar.projectKey>
         <sonar.projectName>API Utilidades</sonar.projectName>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -99,6 +100,7 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
+                            <skip>${jacoco.check.skip}</skip>
                             <rules>
                                 <rule>
                                     <element>BUNDLE</element>
