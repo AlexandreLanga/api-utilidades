@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-analyze:
+  quality-gate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,11 +35,13 @@ jobs:
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         env:
           SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: >-
-          mvn -B -ntp
-          org.sonarsource.scanner.maven:sonar-maven-plugin:5.8.0.7211:sonar
-          -Dsonar.qualitygate.wait=true
+        run: |
+          mvn -B -ntp \
+            org.sonarsource.scanner.maven:sonar-maven-plugin:5.8.0.7211:sonar \
+            -Dsonar.organization="$SONAR_ORGANIZATION" \
+            -Dsonar.qualitygate.wait=true
 
       - name: Skip SonarQube for fork pull requests
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository

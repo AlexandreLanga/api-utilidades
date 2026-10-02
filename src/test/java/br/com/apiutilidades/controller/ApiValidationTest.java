@@ -12,6 +12,7 @@ import br.com.apiutilidades.config.CacheConfig;
 import br.com.apiutilidades.exception.GlobalExceptionHandler;
 import br.com.apiutilidades.service.AddressService;
 import br.com.apiutilidades.service.WeatherService;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -72,4 +73,19 @@ class ApiValidationTest {
 
         verify(weatherService).findByCity("Chapecó", "metric", "pt_br");
     }
+
+        @Test
+        void acceptsValidCoordinatesAndReturnsWeather() throws Exception {
+                when(weatherService.findByCoordinates(new BigDecimal("-27.1"), new BigDecimal("-52.6"), "metric", "pt_br"))
+                                .thenReturn(new WeatherResponse("Chapecó", "BR", 18.2, 17.4, 16.0, 20.0, 72, 3.1, "Clouds", "nublado"));
+
+                mockMvc.perform(get("/api/v1/clima/coordenadas")
+                                                .param("lat", "-27.1")
+                                                .param("lon", "-52.6"))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.cidade").value("Chapecó"));
+
+                verify(weatherService).findByCoordinates(
+                                new BigDecimal("-27.1"), new BigDecimal("-52.6"), "metric", "pt_br");
+        }
 }
