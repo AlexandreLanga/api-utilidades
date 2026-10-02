@@ -20,7 +20,7 @@
         <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
         <jackson-bom.version>3.1.7</jackson-bom.version>
         <tomcat.version>11.0.25</tomcat.version>
-        <sonar.projectKey>br.com.apiutilidades:api-utilidades</sonar.projectKey>
+        <sonar.projectKey>AlexandreLanga_api-utilidades</sonar.projectKey>
         <sonar.projectName>API Utilidades</sonar.projectName>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
@@ -92,6 +92,26 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>enforce-90-percent-line-coverage</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>BUNDLE</element>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

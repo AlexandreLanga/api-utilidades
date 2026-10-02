@@ -58,11 +58,12 @@ docker run --rm -p 8080:8080 -e OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY" api-u
 
 ## SonarQube no GitHub Actions
 
-O workflow `.github/workflows/quality.yml` executa `mvn clean verify`, publica cobertura JaCoCo e envia a análise ao SonarQube, aguardando o Quality Gate. Crie o projeto no servidor com a chave `br.com.apiutilidades:api-utilidades` (ou ajuste `sonar.projectKey` no `pom.xml`).
+O workflow `.github/workflows/quality.yml` executa build, testes e verificação JaCoCo (mínimo de 90% de cobertura de linhas) em pushes e pull requests. A análise SonarCloud roda somente após um push na `main` — normalmente depois do merge — e aguarda o Quality Gate. A chave configurada no `pom.xml` é `AlexandreLanga_api-utilidades`.
 
-Configure no repositório GitHub:
+Configure no Environment `main` do GitHub:
 
 - Secret `SONAR_TOKEN` com um token de análise do projeto.
-- Variable `SONAR_HOST_URL` com a URL HTTPS do SonarQube acessível pelo runner.
+- Variable `SONAR_HOST_URL` com `https://sonarcloud.io`.
+- Variable `SONAR_ORGANIZATION` com a chave da organização no SonarCloud.
 
-O workflow executa build e testes em todos os eventos; em pull requests originados de forks, a análise SonarQube é ignorada porque o GitHub não disponibiliza secrets para esses eventos.
+No SonarCloud, atribua ao projeto um Quality Gate com a condição `Coverage is less than 90%` como falha. No GitHub, exija o check `Build and SonarQube / quality-gate` nas regras da branch principal para bloquear merges abaixo da cobertura JaCoCo. Como o plano atual analisa apenas a `main`, o Quality Gate remoto é verificado após o merge e não pode bloquear retroativamente esse merge; para exigir a aprovação Sonar antes do merge, será necessário habilitar análise de pull requests/branches no plano SonarCloud.
