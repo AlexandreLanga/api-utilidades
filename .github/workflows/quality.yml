@@ -1,4 +1,4 @@
-name: Build and SonarQube
+name: Maven Quality Gate
 
 on:
   pull_request:
