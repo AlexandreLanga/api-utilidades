@@ -63,7 +63,7 @@ O workflow `.github/workflows/quality.yml` executa `mvn clean verify`, exige no 
 Configure no repositório GitHub:
 
 - Secret `SONAR_TOKEN` com um token de análise do projeto.
-- Variable `SONAR_HOST_URL` com `https://sonarcloud.io`.
+- `SONAR_HOST_URL` usa `https://sonarcloud.io` por padrão; configure a variável apenas se usar outro servidor.
 - Variable `SONAR_ORGANIZATION` com a chave da organização no SonarCloud.
 
 No SonarCloud, atribua ao projeto um Quality Gate com a condição `Coverage is less than 90%` como falha. No GitHub, configure a regra de proteção da branch principal para exigir o check `Build and SonarQube / quality-gate`. Assim, o merge requer tanto a cobertura JaCoCo mínima quanto a aprovação do Quality Gate remoto. O build e os testes rodam em todos os eventos; em pull requests de forks, a análise SonarCloud é ignorada porque o GitHub não disponibiliza secrets para esses eventos, mas o limite de cobertura local continua valendo.
