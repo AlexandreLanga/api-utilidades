@@ -6,12 +6,13 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  web:
+    error:
+      include-stacktrace: never
+      include-message: never
 server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
-  error:
-    include-message: never
-    include-stacktrace: never
 openweather:
   api-key: ${OPENWEATHER_API_KEY:}
 management:
