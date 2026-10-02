@@ -55,3 +55,14 @@ mvn test
 docker build -t api-utilidades .
 docker run --rm -p 8080:8080 -e OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY" api-utilidades
 ```
+
+## SonarQube no GitHub Actions
+
+O workflow `.github/workflows/quality.yml` executa `mvn clean verify`, publica cobertura JaCoCo e envia a análise ao SonarQube, aguardando o Quality Gate. Crie o projeto no servidor com a chave `br.com.apiutilidades:api-utilidades` (ou ajuste `sonar.projectKey` no `pom.xml`).
+
+Configure no repositório GitHub:
+
+- Secret `SONAR_TOKEN` com um token de análise do projeto.
+- Variable `SONAR_HOST_URL` com a URL HTTPS do SonarQube acessível pelo runner.
+
+O workflow executa build e testes em todos os eventos; em pull requests originados de forks, a análise SonarQube é ignorada porque o GitHub não disponibiliza secrets para esses eventos.
