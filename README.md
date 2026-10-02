@@ -58,7 +58,7 @@ docker run --rm -p 8080:8080 -e OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY" api-u
 
 ## SonarQube no GitHub Actions
 
-O workflow `.github/workflows/quality.yml` separa as validações: `quality-gate` executa build, testes e verificação JaCoCo (mínimo de 90% de cobertura de linhas) em pull requests e pushes fora da `main`; `sonarqube` roda sozinho após push/merge na `main` (ou execução manual nela), gera a cobertura sem reaplicar o limite local e aguarda o Quality Gate remoto. A chave configurada no `pom.xml` é `AlexandreLanga_api-utilidades`.
+Os workflows separam as validações: `.github/workflows/quality.yml` executa build, testes e verificação JaCoCo (mínimo de 90% de cobertura de linhas) somente em pull requests; `.github/workflows/sonarqube.yml` roda análise após push/merge na `main`, gera a cobertura sem reaplicar o limite local e aguarda o Quality Gate remoto. A chave configurada no `pom.xml` é `AlexandreLanga_api-utilidades`.
 
 Configure no Environment `main` do GitHub:
 
