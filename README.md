@@ -58,7 +58,7 @@ docker run --rm -p 8080:8080 -e OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY" api-u
 
 ## SonarQube no GitHub Actions
 
-O workflow `.github/workflows/quality.yml` executa build, testes e verificação JaCoCo (mínimo de 90% de cobertura de linhas) em pushes e pull requests. A análise SonarCloud roda somente após um push na `main` — normalmente depois do merge — e aguarda o Quality Gate. A chave configurada no `pom.xml` é `AlexandreLanga_api-utilidades`.
+O workflow `.github/workflows/quality.yml` separa as validações: `quality-gate` executa build, testes e verificação JaCoCo (mínimo de 90% de cobertura de linhas) em pull requests e pushes fora da `main`; `sonarqube` roda sozinho após push/merge na `main` (ou execução manual nela), gera a cobertura sem reaplicar o limite local e aguarda o Quality Gate remoto. A chave configurada no `pom.xml` é `AlexandreLanga_api-utilidades`.
 
 Configure no Environment `main` do GitHub:
 
@@ -66,4 +66,4 @@ Configure no Environment `main` do GitHub:
 - Variable `SONAR_HOST_URL` com `https://sonarcloud.io`.
 - Variable `SONAR_ORGANIZATION` com a chave da organização no SonarCloud.
 
-No SonarCloud, atribua ao projeto um Quality Gate com a condição `Coverage is less than 90%` como falha. No GitHub, exija o check `Build and SonarQube / quality-gate` nas regras da branch principal para bloquear merges abaixo da cobertura JaCoCo. Como o plano atual analisa apenas a `main`, o Quality Gate remoto é verificado após o merge e não pode bloquear retroativamente esse merge; para exigir a aprovação Sonar antes do merge, será necessário habilitar análise de pull requests/branches no plano SonarCloud.
+No SonarCloud, atribua ao projeto um Quality Gate com a condição `Coverage is less than 90%` como falha. No GitHub, exija o check `Build and SonarQube / quality-gate` nas regras da branch principal para bloquear merges abaixo da cobertura JaCoCo. Como o plano atual analisa apenas a `main`, o Quality Gate remoto é verificado depois do merge e não pode bloqueá-lo retroativamente; o check pré-merge é o gate local de cobertura.

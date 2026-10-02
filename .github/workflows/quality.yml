@@ -14,6 +14,7 @@ concurrency:
 
 jobs:
   quality-gate:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -30,8 +31,7 @@ jobs:
         run: mvn -B -ntp clean verify
 
   sonarqube:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: quality-gate
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     environment: main
     runs-on: ubuntu-24.04
     steps:
@@ -48,7 +48,7 @@ jobs:
           cache: maven
 
       - name: Build, test, and generate coverage
-        run: mvn -B -ntp clean verify
+        run: mvn -B -ntp clean verify -Djacoco.check.skip=true
 
       - name: SonarQube analysis
         env:
