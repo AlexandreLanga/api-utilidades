@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: api-utilidades
+  cache:
+    type: caffeine
+  mvc:
+    problemdetails:
+      enabled: true
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+openweather:
+  api-key: ${OPENWEATHER_API_KEY:}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+resilience4j:
+  circuitbreaker:
+    instances:
+      viacep:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 20s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - br.com.apiutilidades.exception.ExternalServiceException
+        ignore-exceptions:
+          - br.com.apiutilidades.exception.AddressNotFoundException
+      openweather:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 20s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - br.com.apiutilidades.exception.ExternalServiceException
+        ignore-exceptions:
+          - br.com.apiutilidades.exception.CityNotFoundException
+springdoc:
+  api-docs:
+    enabled: ${OPENAPI_ENABLED:true}
+  swagger-ui:
+    enabled: ${OPENAPI_ENABLED:true}
+    path: /swagger-ui.html
+logging:
+  level:
+    root: INFO
+    br.com.apiutilidades: INFO
