@@ -59,6 +59,32 @@ class ExternalClientsTest {
     }
 
     @Test
+    void viaCepAddressSearchRejectsEmptyResponse() {
+        RestClient.Builder builder = RestClient.builder().baseUrl("https://viacep.test");
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        ViaCepClient client = new ViaCepClient(builder.build());
+        server.expect(requestTo("https://viacep.test/ws/RS/Porto%20Alegre/Domingos/json/"))
+                .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
+
+        assertThrows(ExternalServiceException.class,
+                () -> client.findByAddress("RS", "Porto Alegre", "Domingos"));
+        server.verify();
+    }
+
+    @Test
+    void viaCepAddressSearchWrapsProviderHttpErrors() {
+        RestClient.Builder builder = RestClient.builder().baseUrl("https://viacep.test");
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        ViaCepClient client = new ViaCepClient(builder.build());
+        server.expect(requestTo("https://viacep.test/ws/RS/Porto%20Alegre/Domingos/json/"))
+                .andRespond(withServerError());
+
+        assertThrows(ExternalServiceException.class,
+                () -> client.findByAddress("RS", "Porto Alegre", "Domingos"));
+        server.verify();
+    }
+
+    @Test
     void viaCepRejectsEmptyResponse() {
         RestClient.Builder builder = RestClient.builder().baseUrl("https://viacep.test");
         MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
