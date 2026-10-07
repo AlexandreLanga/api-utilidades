@@ -12,6 +12,7 @@ import br.com.apiutilidades.exception.AddressNotFoundException;
 import br.com.apiutilidades.exception.ExternalServiceException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +35,21 @@ class AddressServiceTest {
     }
 
     @Test
+    void mapsViaCepAddressSearchResults() {
+        when(viaCepClient.findByAddress("RS", "Porto Alegre", "Domingos"))
+                .thenReturn(List.of(new ViaCepClient.ViaCepResponse(
+                        "90010-150", "Rua dos Andradas", "", "Centro Histórico",
+                        "Porto Alegre", "RS", "4314902", "51", false)));
+
+        List<AddressResponse> response = addressService.findByAddress("rs", " Porto Alegre ", " Domingos ");
+
+        assertEquals(1, response.size());
+        assertEquals("90010-150", response.getFirst().cep());
+        assertEquals("Porto Alegre", response.getFirst().cidade());
+        verify(viaCepClient).findByAddress("RS", "Porto Alegre", "Domingos");
+    }
+
+    @Test
     void rejectsCepNotFoundByProvider() {
         when(viaCepClient.findByCep("99999999")).thenReturn(new ViaCepClient.ViaCepResponse(
                 null, null, null, null, null, null, null, null, true));
@@ -48,6 +64,9 @@ class AddressServiceTest {
 
         assertThrows(ExternalServiceException.class,
                 () -> addressService.fallback("01001000", new IllegalStateException("offline")));
+
+        assertThrows(ExternalServiceException.class,
+                () -> addressService.fallback("RS", "Porto Alegre", "Domingos", new IllegalStateException("offline")));
     }
 
     @Test

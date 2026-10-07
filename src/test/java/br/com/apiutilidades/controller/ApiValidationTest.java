@@ -13,6 +13,7 @@ import br.com.apiutilidades.exception.GlobalExceptionHandler;
 import br.com.apiutilidades.service.AddressService;
 import br.com.apiutilidades.service.WeatherService;
 import java.math.BigDecimal;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -49,6 +50,34 @@ class ApiValidationTest {
     @Test
     void rejectsMalformedCepWithBadRequest() throws Exception {
         mockMvc.perform(get("/api/v1/enderecos/123"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    void searchesAddressesByUfCityAndStreet() throws Exception {
+        when(addressService.findByAddress("RS", "Porto Alegre", "Domingos José"))
+                .thenReturn(List.of(new AddressResponse(
+                        "90010-150", "Rua dos Andradas", "", "Centro Histórico",
+                        "Porto Alegre", "RS", "4314902", "51")));
+
+        mockMvc.perform(get("/api/v1/enderecos/busca")
+                        .param("uf", "RS")
+                        .param("cidade", "Porto Alegre")
+                        .param("logradouro", "Domingos José"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].cep").value("90010-150"))
+                .andExpect(jsonPath("$[0].cidade").value("Porto Alegre"));
+
+        verify(addressService).findByAddress("RS", "Porto Alegre", "Domingos José");
+    }
+
+    @Test
+    void rejectsAddressSearchWithInvalidUfOrShortCityAndStreet() throws Exception {
+        mockMvc.perform(get("/api/v1/enderecos/busca")
+                        .param("uf", "Rio")
+                        .param("cidade", "PO")
+                        .param("logradouro", "Rua"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
     }

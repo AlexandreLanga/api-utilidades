@@ -32,6 +32,7 @@ class ApplicationStartupTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("API Utilidades")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("/api/v1/enderecos/{cep}")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/api/v1/enderecos/{cep}")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/api/v1/enderecos/busca")));
     }
 }

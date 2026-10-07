@@ -33,11 +33,12 @@ A página inicial da API fica em <http://localhost:8080/>. Swagger UI: <http://l
 | Método | Endpoint | Observação |
 | --- | --- | --- |
 | GET | `/api/v1/enderecos/{cep}` | Aceita `01001000` ou `01001-000` |
+| GET | `/api/v1/enderecos/busca?uf=RS&cidade=Porto Alegre&logradouro=Domingos` | Pesquisa endereços; cidade e logradouro devem ter ao menos 3 caracteres |
 | GET | `/api/v1/clima/cidade?cidade=Chapecó` | Unidade `metric`, `imperial` ou `standard`; idioma padrão `pt_br` |
 | GET | `/api/v1/clima/coordenadas?lat=-27.1&lon=-52.6` | Latitude entre -90 e 90; longitude entre -180 e 180 |
 | GET | `/actuator/health` | Health check sem detalhes internos |
 
-Erros seguem RFC 7807 (`application/problem+json`). CEP inexistente retorna 404, parâmetros inválidos 400 e indisponibilidade de provedor 503.
+Erros seguem RFC 7807 (`application/problem+json`). CEP inexistente retorna 404, parâmetros inválidos 400 e indisponibilidade de provedor 503. A busca por endereço segue o [formato oficial do ViaCEP](https://viacep.com.br/), que requer UF, cidade e logradouro; cidade e logradouro precisam ter no mínimo 3 caracteres. A busca pode retornar até 50 correspondências.
 
 ## Segurança e operação
 

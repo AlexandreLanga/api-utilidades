@@ -318,7 +318,7 @@
       <div>
         <p class="eyebrow">API REST · v1</p>
         <h1 id="page-title">Utilidades para o <span>seu dia.</span></h1>
-        <p class="intro">Consulte endereços pelo CEP e descubra o clima atual de uma cidade ou localização. Experimente os endpoints diretamente por aqui.</p>
+        <p class="intro">Consulte endereços pelo CEP ou pela rua e descubra o clima atual de uma cidade ou localização. Experimente os endpoints diretamente por aqui.</p>
       </div>
       <div class="hero-links">
         <a class="button primary" href="/swagger-ui.html">Abrir documentação <span aria-hidden="true">↗</span></a>
@@ -345,6 +345,30 @@
               </label>
             </div>
             <button class="primary" type="submit">Consultar endereço</button>
+          </form>
+          <pre class="response" aria-live="polite"></pre>
+        </article>
+
+        <article class="card">
+          <div class="card-top"><span class="method">GET</span><span class="category">Endereços</span></div>
+          <code class="path">/api/v1/enderecos/busca</code>
+          <h3>Pesquisar por endereço</h3>
+          <p>Informe UF, cidade e logradouro. Cidade e logradouro exigem ao menos 3 caracteres.</p>
+          <form data-endpoint="address-search">
+            <div class="fields">
+              <label for="uf">UF
+                <input id="uf" name="uf" type="text" maxlength="2" pattern="[A-Za-z]{2}" placeholder="RS" required>
+              </label>
+              <label for="cidade-busca">Cidade
+                <input id="cidade-busca" name="cidade" type="text" minlength="3" placeholder="Porto Alegre" required>
+              </label>
+            </div>
+            <div class="fields single">
+              <label for="logradouro">Logradouro
+                <input id="logradouro" name="logradouro" type="text" minlength="3" placeholder="Domingos José" required>
+              </label>
+            </div>
+            <button class="primary" type="submit">Pesquisar endereços</button>
           </form>
           <pre class="response" aria-live="polite"></pre>
         </article>
@@ -422,9 +446,15 @@
         const endpoint = form.dataset.endpoint;
         const path = endpoint === "address"
           ? `/api/v1/enderecos/${encodeURIComponent(values.get("cep").trim())}`
-          : endpoint === "city"
-            ? `/api/v1/clima/cidade?${new URLSearchParams({ cidade: values.get("cidade").trim() })}`
-            : `/api/v1/clima/coordenadas?${new URLSearchParams({ lat: values.get("lat"), lon: values.get("lon") })}`;
+          : endpoint === "address-search"
+            ? `/api/v1/enderecos/busca?${new URLSearchParams({
+              uf: values.get("uf").trim(),
+              cidade: values.get("cidade").trim(),
+              logradouro: values.get("logradouro").trim()
+            })}`
+            : endpoint === "city"
+              ? `/api/v1/clima/cidade?${new URLSearchParams({ cidade: values.get("cidade").trim() })}`
+              : `/api/v1/clima/coordenadas?${new URLSearchParams({ lat: values.get("lat"), lon: values.get("lon") })}`;
 
         button.disabled = true;
         button.textContent = "Consultando...";
@@ -448,7 +478,11 @@
           response.classList.add("error");
         } finally {
           button.disabled = false;
-          button.textContent = endpoint === "address" ? "Consultar endereço" : "Consultar clima";
+          button.textContent = endpoint === "address"
+            ? "Consultar endereço"
+            : endpoint === "address-search"
+              ? "Pesquisar endereços"
+              : "Consultar clima";
         }
       });
     });
