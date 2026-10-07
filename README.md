@@ -47,7 +47,9 @@ Todas as rotas `/api/**` exigem que o valor configurado em `JWT_SECRET` seja env
 ## Segurança e operação
 
 - Chaves externas e de acesso à API são configuradas por variáveis de ambiente e não são incluídas na saída nem nos logs da aplicação.
-- Conexões externas têm timeout de conexão de 3 s e leitura de 5 s, sem seguir redirecionamentos.
+- A API limita cada IP a 60 requisições por minuto por instância, usando token bucket; o limite e a janela podem ser ajustados com `API_RATE_LIMIT_REQUESTS` e `API_RATE_LIMIT_WINDOW`. Requisições excedentes recebem 429 e `Retry-After`. A página de demonstração solicita a chave no navegador e a envia somente no header; não a armazena.
+- O rate limit é local à instância e usa o endereço remoto da conexão. Em implantação com múltiplas réplicas ou proxy compartilhado, configure um limite distribuído no gateway/ingress e encaminhamento confiável do IP do cliente.
+- Conexões externas têm timeout de conexão de 3 s e leitura de 5 s, sem seguir redirecionamentos. O servidor limita o tempo de estabelecimento da conexão a 5 s e o tamanho dos headers HTTP a 8 KB.
 - Circuit breaker independente para cada provedor; cache em memória de CEPs por 24 h, limitado a 10.000 itens.
 - O Actuator expõe somente `health` e `info`; detalhes de health e stack traces não são enviados aos clientes.
 - A documentação OpenAPI fica habilitada por padrão para desenvolvimento e pode ser desativada na implantação com `OPENAPI_ENABLED=false`.

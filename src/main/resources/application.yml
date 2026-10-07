@@ -13,8 +13,14 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
+  max-http-request-header-size: 8KB
+  tomcat:
+    connection-timeout: 5s
 api:
   jwt-secret: ${JWT_SECRET:}
+  rate-limit:
+    requests: ${API_RATE_LIMIT_REQUESTS:60}
+    window: ${API_RATE_LIMIT_WINDOW:1m}
 openweather:
   api-key: ${OPENWEATHER_API_KEY:}
 management:
