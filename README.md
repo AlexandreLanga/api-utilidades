@@ -6,9 +6,9 @@ API REST em Java 21 e Spring Boot para consulta de endereços via ViaCEP e clima
 
 - JDK 21
 - Maven 3.9+
-- Chave OpenWeatherMap configurada em `OPENWEATHER_API_KEY`
+- Chaves `OPENWEATHER_API_KEY` e `JWT_SECRET` configuradas
 
-A aplicação falha no startup com uma mensagem explícita quando a chave não está configurada. Não coloque chaves reais em arquivos versionados. Em produção, injete o segredo pelo gerenciador de segredos da plataforma.
+A aplicação falha no startup com uma mensagem explícita quando `OPENWEATHER_API_KEY` ou `JWT_SECRET` não está configurada. Gere um valor aleatório forte para `JWT_SECRET`. Não coloque chaves reais em arquivos versionados. Em produção, injete os segredos pelo gerenciador de segredos da plataforma.
 
 ## Executar
 
@@ -16,6 +16,7 @@ PowerShell:
 
 ```powershell
 $env:OPENWEATHER_API_KEY = "sua-chave"
+$env:JWT_SECRET = "seu-segredo-forte"
 mvn spring-boot:run
 ```
 
@@ -23,6 +24,7 @@ Linux/macOS:
 
 ```sh
 export OPENWEATHER_API_KEY="sua-chave"
+export JWT_SECRET="seu-segredo-forte"
 mvn spring-boot:run
 ```
 
@@ -40,9 +42,11 @@ A página inicial da API fica em <http://localhost:8080/>. Swagger UI: <http://l
 
 Erros seguem RFC 7807 (`application/problem+json`). CEP inexistente retorna 404, parâmetros inválidos 400 e indisponibilidade de provedor 503. A busca por endereço segue o [formato oficial do ViaCEP](https://viacep.com.br/), que requer UF, cidade e logradouro; cidade e logradouro precisam ter no mínimo 3 caracteres. A busca pode retornar até 50 correspondências.
 
+Todas as rotas `/api/**` exigem que o valor configurado em `JWT_SECRET` seja enviado no header `X-API-KEY`. Chave ausente ou inválida retorna 401. A página inicial, documentação OpenAPI e health check não exigem esse header.
+
 ## Segurança e operação
 
-- Chave externa obrigatória via variável de ambiente; não é incluída na saída nem nos logs da aplicação.
+- Chaves externas e de acesso à API são configuradas por variáveis de ambiente e não são incluídas na saída nem nos logs da aplicação.
 - Conexões externas têm timeout de conexão de 3 s e leitura de 5 s, sem seguir redirecionamentos.
 - Circuit breaker independente para cada provedor; cache em memória de CEPs por 24 h, limitado a 10.000 itens.
 - O Actuator expõe somente `health` e `info`; detalhes de health e stack traces não são enviados aos clientes.
@@ -54,7 +58,7 @@ Erros seguem RFC 7807 (`application/problem+json`). CEP inexistente retorna 404,
 ```sh
 mvn test
 docker build -t api-utilidades .
-docker run --rm -p 8080:8080 -e OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY" api-utilidades
+docker run --rm -p 8080:8080 -e OPENWEATHER_API_KEY="$OPENWEATHER_API_KEY" -e JWT_SECRET="$JWT_SECRET" api-utilidades
 ```
 
 ## SonarQube no GitHub Actions

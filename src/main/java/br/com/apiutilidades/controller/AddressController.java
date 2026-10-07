@@ -3,6 +3,7 @@ package br.com.apiutilidades.controller;
 import br.com.apiutilidades.dto.AddressResponse;
 import br.com.apiutilidades.service.AddressService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/api/v1/enderecos")
+@SecurityRequirement(name = "ApiKeyAuth")
 public class AddressController {
 
     private final AddressService addressService;

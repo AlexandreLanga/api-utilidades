@@ -13,6 +13,8 @@ spring:
 server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
+api:
+  jwt-secret: ${JWT_SECRET:}
 openweather:
   api-key: ${OPENWEATHER_API_KEY:}
 management:

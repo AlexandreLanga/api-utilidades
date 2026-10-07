@@ -3,6 +3,7 @@ package br.com.apiutilidades.controller;
 import br.com.apiutilidades.dto.WeatherResponse;
 import br.com.apiutilidades.service.WeatherService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/api/v1/clima")
+@SecurityRequirement(name = "ApiKeyAuth")
 public class WeatherController {
 
     private final WeatherService weatherService;

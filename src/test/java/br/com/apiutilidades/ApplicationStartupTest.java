@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = "openweather.api-key=test-key")
+@SpringBootTest(properties = {"openweather.api-key=test-key", "api.jwt-secret=test-api-secret"})
 @AutoConfigureMockMvc
 class ApplicationStartupTest {
 
