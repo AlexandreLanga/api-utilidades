@@ -26,7 +26,7 @@ export OPENWEATHER_API_KEY="sua-chave"
 mvn spring-boot:run
 ```
 
-Swagger UI: <http://localhost:8080/swagger-ui.html>
+A página inicial da API fica em <http://localhost:8080/>. Swagger UI: <http://localhost:8080/swagger-ui.html>
 
 ## Endpoints
 
