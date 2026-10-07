@@ -70,6 +70,15 @@ class AddressServiceTest {
     }
 
     @Test
+    void addressSearchFallbackPreservesNotFound() {
+        AddressService service = new AddressService(viaCepClient);
+        AddressNotFoundException notFound = new AddressNotFoundException("CEP não encontrado.");
+
+        assertSame(notFound, assertThrows(AddressNotFoundException.class,
+                () -> service.fallback("RS", "Porto Alegre", "Domingos", notFound)));
+    }
+
+    @Test
     void fallbackReportsOpenCircuitAsUnavailable() {
         CircuitBreaker circuitBreaker = CircuitBreaker.ofDefaults("viacep-test");
         circuitBreaker.transitionToOpenState();
@@ -78,5 +87,17 @@ class AddressServiceTest {
 
         assertThrows(ExternalServiceException.class,
                 () -> addressService.fallback("01001000", openCircuit));
+    }
+
+    @Test
+    void addressSearchFallbackReportsOpenCircuitAsUnavailable() {
+        AddressService service = new AddressService(viaCepClient);
+        CircuitBreaker circuitBreaker = CircuitBreaker.ofDefaults("viacep-address-test");
+        circuitBreaker.transitionToOpenState();
+        Runnable guardedCall = CircuitBreaker.decorateRunnable(circuitBreaker, () -> { });
+        CallNotPermittedException openCircuit = assertThrows(CallNotPermittedException.class, guardedCall::run);
+
+        assertThrows(ExternalServiceException.class,
+                () -> service.fallback("RS", "Porto Alegre", "Domingos", openCircuit));
     }
 }
