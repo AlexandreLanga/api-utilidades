@@ -2,6 +2,7 @@ package br.com.apiutilidades.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.Matchers.endsWith;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -11,6 +12,7 @@ import br.com.apiutilidades.config.WeatherProperties;
 import br.com.apiutilidades.exception.CityNotFoundException;
 import br.com.apiutilidades.exception.ExternalServiceException;
 import java.math.BigDecimal;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,13 +28,33 @@ class ExternalClientsTest {
         ViaCepClient client = new ViaCepClient(builder.build());
         server.expect(requestTo("https://viacep.test/ws/01001000/json/"))
                 .andRespond(withSuccess("""
-                        {"cep":"01001-000","localidade":"São Paulo","uf":"SP","erro":false}
+                        {"cep":"01001-000","logradouro":"Praça da Sé","complemento":"lado ímpar","bairro":"Sé","localidade":"São Paulo","uf":"SP","ibge":"3550308","ddd":"11"}
                         """, MediaType.APPLICATION_JSON));
 
         ViaCepClient.ViaCepResponse response = client.findByCep("01001000");
 
+        assertEquals("01001-000", response.cep());
         assertEquals("São Paulo", response.localidade());
         assertEquals("SP", response.uf());
+        server.verify();
+    }
+
+    @Test
+    void viaCepSearchesByAddressAndEncodesPathParameters() {
+        RestClient.Builder builder = RestClient.builder().baseUrl("https://viacep.test");
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        ViaCepClient client = new ViaCepClient(builder.build());
+        server.expect(requestTo(endsWith("/ws/RS/Porto%20Alegre/Domingos%20Jos%C3%A9/json/")))
+                .andRespond(withSuccess("""
+                        [{"cep":"90010-150","logradouro":"Rua dos Andradas","complemento":"","bairro":"Centro Histórico","localidade":"Porto Alegre","uf":"RS","ibge":"4314902","ddd":"51"}]
+                        """, MediaType.APPLICATION_JSON));
+
+        List<ViaCepClient.ViaCepResponse> response =
+                client.findByAddress("RS", "Porto Alegre", "Domingos José");
+
+        assertEquals(1, response.size());
+        assertEquals("90010-150", response.getFirst().cep());
+        assertEquals("Porto Alegre", response.getFirst().localidade());
         server.verify();
     }
 
