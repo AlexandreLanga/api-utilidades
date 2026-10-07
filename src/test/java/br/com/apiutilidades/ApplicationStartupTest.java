@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = "openweather.api-key=test-key")
+@SpringBootTest(properties = {"openweather.api-key=test-key", "api.jwt-secret=test-api-secret"})
 @AutoConfigureMockMvc
 class ApplicationStartupTest {
 
@@ -33,6 +33,7 @@ class ApplicationStartupTest {
                 .andExpect(content().contentTypeCompatibleWith("text/html"))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("API Utilidades")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("/api/v1/enderecos/{cep}")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("/api/v1/enderecos/busca")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/api/v1/enderecos/busca")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("X-API-KEY")));
     }
 }

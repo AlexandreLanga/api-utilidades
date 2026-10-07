@@ -332,6 +332,10 @@
         <p>As respostas aparecem em JSON logo abaixo de cada consulta.</p>
       </div>
 
+      <label for="api-key">Chave de API (X-API-KEY)
+        <input id="api-key" type="password" autocomplete="off" placeholder="Informe o JWT_SECRET configurado no servidor">
+      </label>
+
       <div class="endpoint-list">
         <article class="card">
           <div class="card-top"><span class="method">GET</span><span class="category">Endereços</span></div>
@@ -463,7 +467,12 @@
         response.textContent = "Aguardando resposta da API...";
 
         try {
-          const result = await fetch(path, { headers: { Accept: "application/json" } });
+          const result = await fetch(path, {
+            headers: {
+              Accept: "application/json",
+              "X-API-KEY": document.getElementById("api-key").value
+            }
+          });
           const body = await result.text();
           let formattedBody = body;
           try {

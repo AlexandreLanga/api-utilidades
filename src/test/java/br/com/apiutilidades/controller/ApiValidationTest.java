@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.com.apiutilidades.dto.AddressResponse;
 import br.com.apiutilidades.dto.WeatherResponse;
+import br.com.apiutilidades.config.ApiKeyConfig;
+import br.com.apiutilidades.config.ApiKeyInterceptor;
 import br.com.apiutilidades.config.CacheConfig;
 import br.com.apiutilidades.exception.GlobalExceptionHandler;
 import br.com.apiutilidades.service.AddressService;
@@ -20,9 +22,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
-@WebMvcTest(value = {AddressController.class, WeatherController.class}, properties = "openweather.api-key=test-key")
-@Import({GlobalExceptionHandler.class, CacheConfig.class})
+@WebMvcTest(value = {AddressController.class, WeatherController.class},
+        properties = {"openweather.api-key=test-key", "api.jwt-secret=test-api-secret"})
+@Import({GlobalExceptionHandler.class, CacheConfig.class, ApiKeyConfig.class})
 class ApiValidationTest {
 
     @Autowired
@@ -35,11 +39,27 @@ class ApiValidationTest {
     private WeatherService weatherService;
 
     @Test
+    void rejectsApiRequestWithoutApiKey() throws Exception {
+        mockMvc.perform(get("/api/v1/enderecos/01001000"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.detail").value("Chave de API ausente ou inválida."));
+    }
+
+    @Test
+    void rejectsApiRequestWithInvalidApiKey() throws Exception {
+        mockMvc.perform(get("/api/v1/enderecos/01001000")
+                        .header(ApiKeyInterceptor.API_KEY_HEADER, "invalid-api-key"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401));
+    }
+
+    @Test
     void acceptsMaskedCepAndPassesNormalizedValueToService() throws Exception {
         when(addressService.findByCep("01001000"))
                 .thenReturn(new AddressResponse("01001-000", "Praça da Sé", "", "Sé", "São Paulo", "SP", "3550308", "11"));
 
-        mockMvc.perform(get("/api/v1/enderecos/01001-000"))
+        mockMvc.perform(apiGet("/api/v1/enderecos/01001-000"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.cidade").value("São Paulo"))
                 .andExpect(jsonPath("$.uf").value("SP"));
@@ -49,7 +69,7 @@ class ApiValidationTest {
 
     @Test
     void rejectsMalformedCepWithBadRequest() throws Exception {
-        mockMvc.perform(get("/api/v1/enderecos/123"))
+        mockMvc.perform(apiGet("/api/v1/enderecos/123"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
     }
@@ -61,7 +81,7 @@ class ApiValidationTest {
                         "90010-150", "Rua dos Andradas", "", "Centro Histórico",
                         "Porto Alegre", "RS", "4314902", "51")));
 
-        mockMvc.perform(get("/api/v1/enderecos/busca")
+        mockMvc.perform(apiGet("/api/v1/enderecos/busca")
                         .param("uf", "RS")
                         .param("cidade", "Porto Alegre")
                         .param("logradouro", "Domingos José"))
@@ -74,7 +94,7 @@ class ApiValidationTest {
 
     @Test
     void rejectsAddressSearchWithInvalidUfOrShortCityAndStreet() throws Exception {
-        mockMvc.perform(get("/api/v1/enderecos/busca")
+        mockMvc.perform(apiGet("/api/v1/enderecos/busca")
                         .param("uf", "Rio")
                         .param("cidade", "PO")
                         .param("logradouro", "Rua"))
@@ -84,7 +104,7 @@ class ApiValidationTest {
 
     @Test
     void rejectsOutOfRangeCoordinatesWithBadRequest() throws Exception {
-        mockMvc.perform(get("/api/v1/clima/coordenadas").param("lat", "91").param("lon", "0"))
+        mockMvc.perform(apiGet("/api/v1/clima/coordenadas").param("lat", "91").param("lon", "0"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
     }
@@ -94,7 +114,7 @@ class ApiValidationTest {
         when(weatherService.findByCity("Chapecó", "metric", "pt_br"))
                 .thenReturn(new WeatherResponse("Chapecó", "BR", 18.2, 17.4, 16.0, 20.0, 72, 3.1, "Clouds", "nublado"));
 
-        mockMvc.perform(get("/api/v1/clima/cidade").param("cidade", "Chapecó"))
+        mockMvc.perform(apiGet("/api/v1/clima/cidade").param("cidade", "Chapecó"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.temperaturaAtual").value(18.2))
                 .andExpect(jsonPath("$.umidadePercentual").value(72))
@@ -108,7 +128,7 @@ class ApiValidationTest {
                 when(weatherService.findByCoordinates(new BigDecimal("-27.1"), new BigDecimal("-52.6"), "metric", "pt_br"))
                                 .thenReturn(new WeatherResponse("Chapecó", "BR", 18.2, 17.4, 16.0, 20.0, 72, 3.1, "Clouds", "nublado"));
 
-                mockMvc.perform(get("/api/v1/clima/coordenadas")
+                mockMvc.perform(apiGet("/api/v1/clima/coordenadas")
                                                 .param("lat", "-27.1")
                                                 .param("lon", "-52.6"))
                                 .andExpect(status().isOk())
@@ -117,4 +137,8 @@ class ApiValidationTest {
                 verify(weatherService).findByCoordinates(
                                 new BigDecimal("-27.1"), new BigDecimal("-52.6"), "metric", "pt_br");
         }
+
+    private MockHttpServletRequestBuilder apiGet(String uri) {
+        return get(uri).header(ApiKeyInterceptor.API_KEY_HEADER, "test-api-secret");
+    }
 }
