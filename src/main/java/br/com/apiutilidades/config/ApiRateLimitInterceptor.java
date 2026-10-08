@@ -37,6 +37,9 @@ public class ApiRateLimitInterceptor implements HandlerInterceptor {
             HttpServletRequest request,
             HttpServletResponse response,
             Object handler) throws IOException {
+        if (org.springframework.web.cors.CorsUtils.isPreFlightRequest(request)) {
+            return true;
+        }
         TokenBucket bucket = buckets.get(request.getRemoteAddr(), ignored -> new TokenBucket(requestLimit));
         TokenBucket.Decision decision = bucket.tryAcquire(System.nanoTime(), requestLimit, windowNanos);
 

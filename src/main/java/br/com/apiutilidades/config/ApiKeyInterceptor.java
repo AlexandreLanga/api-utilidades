@@ -22,6 +22,9 @@ public class ApiKeyInterceptor implements HandlerInterceptor {
             HttpServletRequest request,
             HttpServletResponse response,
             Object handler) throws IOException {
+        if (org.springframework.web.cors.CorsUtils.isPreFlightRequest(request)) {
+            return true;
+        }
         String providedKey = request.getHeader(API_KEY_HEADER);
         if (providedKey != null
                 && MessageDigest.isEqual(expectedKey, providedKey.getBytes(StandardCharsets.UTF_8))) {

@@ -3,6 +3,7 @@ package br.com.apiutilidades.config;
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -21,6 +22,15 @@ public class ApiKeyConfig implements WebMvcConfigurer {
         }
         this.apiKeyInterceptor = new ApiKeyInterceptor(jwtSecret);
         this.apiRateLimitInterceptor = new ApiRateLimitInterceptor(requests, window);
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOrigins("https://alexandrelanga.github.io")
+                .allowedMethods("GET", "OPTIONS")
+                .allowedHeaders("*")
+                .maxAge(3600);
     }
 
     @Override
