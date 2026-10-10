@@ -27,7 +27,7 @@ public class ApiKeyConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("https://alexandrelanga.github.io")
+                .allowedOrigins("https://minha-historia-na-web.vercel.app")
                 .allowedMethods("GET", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);
